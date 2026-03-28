@@ -1,0 +1,613 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary);background:var(--color-background-tertiary)}
+.app{display:flex;flex-direction:column;min-height:600px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.logo{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.logo span{color:#534AB7}
+.role-toggle{display:flex;gap:4px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3px}
+.role-btn{padding:5px 12px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;background:transparent;color:var(--color-text-secondary);transition:all 0.15s}
+.role-btn.active{background:var(--color-background-primary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary)}
+.notif-bell{position:relative;cursor:pointer;padding:6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);font-size:14px}
+.notif-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;background:#534AB7;border-radius:50%;border:1.5px solid var(--color-background-primary)}
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:180px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:12px 0;flex-shrink:0}
+.nav-section{padding:0 8px;margin-bottom:8px}
+.nav-label{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.05em;padding:4px 8px;margin-bottom:2px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--border-radius-md);cursor:pointer;color:var(--color-text-secondary);font-size:13px;transition:all 0.1s}
+.nav-item:hover{background:var(--color-background-secondary)}
+.nav-item.active{background:#EEEDFE;color:#534AB7;font-weight:500}
+.nav-item .icon{font-size:14px;width:16px;text-align:center}
+.badge{margin-left:auto;background:#534AB7;color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:500}
+.main{flex:1;overflow-y:auto;padding:16px}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:16px;font-weight:500;margin-bottom:14px;color:var(--color-text-primary)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.stat-label{font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.stat-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.stat-up{color:#3B6D11}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;margin-bottom:12px;color:var(--color-text-secondary)}
+.booking-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.booking-item:last-child{border-bottom:none}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.av-purple{background:#EEEDFE;color:#534AB7}
+.av-teal{background:#E1F5EE;color:#0F6E56}
+.av-amber{background:#FAEEDA;color:#854F0B}
+.av-pink{background:#FBEAF0;color:#993556}
+.booking-info{flex:1}
+.booking-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.booking-time{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+.status-badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px}
+.s-confirmed{background:#EAF3DE;color:#3B6D11}
+.s-pending{background:#FAEEDA;color:#854F0B}
+.s-cancelled{background:#FCEBEB;color:#A32D2D}
+.s-upcoming{background:#EEEDFE;color:#534AB7}
+.actions{display:flex;gap:6px;margin-left:6px}
+.btn{padding:5px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all 0.1s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#534AB7;color:#fff;border-color:#534AB7}
+.btn-primary:hover{background:#3C3489}
+.btn-sm{padding:4px 8px;font-size:11px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-header{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:var(--border-radius-md);cursor:pointer;color:var(--color-text-secondary);transition:all 0.1s;position:relative}
+.cal-day:hover{background:var(--color-background-secondary)}
+.cal-day.has-booking::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;background:#534AB7;border-radius:50%}
+.cal-day.today{background:#534AB7;color:#fff;font-weight:500}
+.cal-day.today:hover{background:#3C3489}
+.cal-day.selected{border:1.5px solid #534AB7;color:#534AB7;font-weight:500}
+.cal-day.empty{cursor:default}
+.time-slots{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto}
+.time-slot{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);font-size:12px;cursor:pointer;transition:all 0.1s}
+.time-slot:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.time-slot.booked{background:var(--color-background-secondary);cursor:not-allowed;opacity:0.6}
+.time-slot.selected{border-color:#534AB7;background:#EEEDFE;color:#534AB7}
+.slot-time{font-weight:500}
+.slot-status{font-size:10px;color:var(--color-text-tertiary)}
+.msg-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:10px;padding-right:4px}
+.msg-row{display:flex;gap:8px}
+.msg-row.mine{flex-direction:row-reverse}
+.msg-bubble{max-width:70%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg-row:not(.mine) .msg-bubble{background:var(--color-background-secondary);color:var(--color-text-primary);border-radius:4px 12px 12px 12px}
+.msg-row.mine .msg-bubble{background:#534AB7;color:#fff;border-radius:12px 4px 12px 12px}
+.msg-time{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;display:block}
+.msg-input-row{display:flex;gap:6px}
+.msg-input{flex:1;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);outline:none}
+.msg-input:focus{border-color:#534AB7}
+.notif-panel{position:absolute;right:8px;top:48px;width:280px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:none}
+.notif-panel.open{display:block}
+.notif-header{padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;font-weight:500}
+.notif-item{display:flex;gap:10px;padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background 0.1s}
+.notif-item:hover{background:var(--color-background-secondary)}
+.notif-item.unread{background:#EEEDFE05}
+.notif-dot2{width:8px;height:8px;border-radius:50%;background:#534AB7;flex-shrink:0;margin-top:3px}
+.notif-text{font-size:12px;color:var(--color-text-primary);line-height:1.4}
+.notif-ts{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+.ws-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
+.ws-dot{width:7px;height:7px;border-radius:50%;background:#639922;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.earnings-bar{height:5px;background:var(--color-background-secondary);border-radius:20px;margin-top:6px;overflow:hidden}
+.earnings-fill{height:100%;background:#534AB7;border-radius:20px;transition:width 0.6s}
+.service-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.service-item:last-child{border-bottom:none}
+.service-icon{width:34px;height:34px;border-radius:var(--border-radius-md);background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.service-details{flex:1}
+.service-name{font-size:13px;font-weight:500}
+.service-price{font-size:12px;color:var(--color-text-secondary)}
+.toggle-wrap{display:flex;align-items:center;gap:6px}
+.toggle{width:32px;height:18px;background:#534AB7;border-radius:20px;position:relative;cursor:pointer;flex-shrink:0}
+.toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;right:3px;transition:right 0.15s}
+.toggle.off{background:var(--color-background-secondary)}
+.toggle.off::after{right:17px}
+.client-providers{display:flex;flex-direction:column;gap:8px}
+.provider-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);cursor:pointer;transition:all 0.15s}
+.provider-card:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.provider-card.sel{border-color:#534AB7;background:#EEEDFE}
+.stars{color:#EF9F27;font-size:12px}
+.booking-flow{display:flex;flex-direction:column;gap:10px}
+.flow-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-text-secondary)}
+.flow-num{width:20px;height:20px;border-radius:50%;border:1px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.flow-num.done{background:#534AB7;border-color:#534AB7;color:#fff}
+.flow-num.active{border-color:#534AB7;color:#534AB7}
+</style>
+
+<div class="app" style="position:relative">
+<div class="topbar">
+  <div class="logo">Book<span>Sync</span></div>
+  <div class="role-toggle">
+    <button class="role-btn active" onclick="setRole('provider')">Service Provider</button>
+    <button class="role-btn" onclick="setRole('client')">Client</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="ws-indicator"><div class="ws-dot"></div>Live</div>
+    <button class="notif-bell" onclick="toggleNotif()" id="bell">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot" id="notif-dot"></span>
+    </button>
+  </div>
+</div>
+
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">Notifications</div>
+  <div id="notif-list"></div>
+</div>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main" id="main-content"></div>
+</div>
+</div>
+
+<script>
+let role = 'provider';
+let currentPage = 'dashboard';
+let notifOpen = false;
+let selectedDate = 11;
+let selectedSlot = null;
+let selectedProvider = 0;
+let messages = [
+  {from:'client',text:'Hi! I need help with a full haircut and beard trim.',time:'9:02 AM'},
+  {from:'provider',text:'Of course! I have slots open this week. Would Thursday at 2 PM work for you?',time:'9:05 AM'},
+  {from:'client',text:'Thursday works great. Please confirm the booking.',time:'9:07 AM'},
+  {from:'provider',text:'Done! Booking confirmed for Thursday Mar 13 at 2:00 PM. See you then!',time:'9:08 AM'},
+];
+let notifications = [
+  {text:'New booking from Meera S. — Thursday 2:00 PM',time:'2 min ago',unread:true},
+  {text:'Arjun K. rescheduled to Friday 11:00 AM',time:'18 min ago',unread:true},
+  {text:'Payment of ₹850 received from Priya T.',time:'1 hr ago',unread:false},
+  {text:'New review: "Excellent service!" ★★★★★',time:'3 hrs ago',unread:false},
+];
+
+const providerNav = [
+  {id:'dashboard',icon:'▦',label:'Dashboard'},
+  {id:'calendar',icon:'◫',label:'Calendar'},
+  {id:'bookings',icon:'≡',label:'Bookings',badge:3},
+  {id:'messages',icon:'◎',label:'Messages',badge:1},
+  {id:'services',icon:'◈',label:'Services'},
+];
+const clientNav = [
+  {id:'discover',icon:'◎',label:'Discover'},
+  {id:'book',icon:'◫',label:'Book a Session'},
+  {id:'my-bookings',icon:'≡',label:'My Bookings'},
+  {id:'messages',icon:'◎',label:'Messages'},
+];
+
+const providers = [
+  {name:'Ravi Sharma',service:'Haircut & Styling',rating:4.9,reviews:128,price:'₹500',av:'RS',avc:'av-purple'},
+  {name:'Nisha Patel',service:'Skincare & Facials',rating:4.8,reviews:94,price:'₹1200',av:'NP',avc:'av-teal'},
+  {name:'Amir Khan',service:'Physiotherapy',rating:4.7,reviews:67,price:'₹800',av:'AK',avc:'av-amber'},
+];
+
+const bookings = [
+  {name:'Meera Singh',time:'Thu Mar 13 · 2:00 PM',status:'confirmed',service:'Haircut',av:'MS',avc:'av-purple'},
+  {name:'Arjun Kumar',time:'Fri Mar 14 · 11:00 AM',status:'pending',service:'Beard Trim',av:'AK',avc:'av-amber'},
+  {name:'Priya Tiwari',time:'Sat Mar 15 · 3:30 PM',status:'confirmed',service:'Full Style',av:'PT',avc:'av-teal'},
+  {name:'Rahul Joshi',time:'Sun Mar 16 · 10:00 AM',status:'cancelled',service:'Haircut',av:'RJ',avc:'av-pink'},
+];
+
+const slots = [
+  {time:'9:00 AM',status:'booked'},{time:'10:00 AM',status:'available'},
+  {time:'11:00 AM',status:'booked'},{time:'12:00 PM',status:'available'},
+  {time:'2:00 PM',status:'booked'},{time:'3:00 PM',status:'available'},
+  {time:'4:00 PM',status:'available'},{time:'5:00 PM',status:'available'},
+];
+
+function setRole(r){
+  role=r;
+  currentPage = r==='provider'?'dashboard':'discover';
+  document.querySelectorAll('.role-btn').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&r==='provider')||(i===1&&r==='client'));
+  });
+  renderSidebar();renderPage();
+}
+
+function renderSidebar(){
+  const nav = role==='provider'?providerNav:clientNav;
+  const s = document.getElementById('sidebar');
+  s.innerHTML='<div class="nav-section"><div class="nav-label">Menu</div>'+
+    nav.map(n=>`<div class="nav-item${currentPage===n.id?' active':''}" onclick="goTo('${n.id}')">
+      <span class="icon">${n.icon}</span>${n.label}
+      ${n.badge?`<span class="badge">${n.badge}</span>`:''}
+    </div>`).join('')+'</div>'+
+    `<div style="padding:8px;margin-top:auto;border-top:0.5px solid var(--color-border-tertiary);margin-top:12px">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 8px">
+        <div class="avatar av-purple" style="width:28px;height:28px;font-size:10px">${role==='provider'?'RS':'MK'}</div>
+        <div><div style="font-size:12px;font-weight:500">${role==='provider'?'Ravi Sharma':'Meera K.'}</div>
+        <div style="font-size:10px;color:var(--color-text-tertiary)">${role==='provider'?'Provider':'Client'}</div></div>
+      </div></div>`;
+}
+
+function goTo(page){currentPage=page;renderSidebar();renderPage();}
+
+function renderPage(){
+  const el=document.getElementById('main-content');
+  if(role==='provider'){
+    if(currentPage==='dashboard') el.innerHTML=providerDashboard();
+    else if(currentPage==='calendar') el.innerHTML=calendarPage();
+    else if(currentPage==='bookings') el.innerHTML=bookingsPage();
+    else if(currentPage==='messages') el.innerHTML=messagesPage();
+    else if(currentPage==='services') el.innerHTML=servicesPage();
+  } else {
+    if(currentPage==='discover') el.innerHTML=discoverPage();
+    else if(currentPage==='book') el.innerHTML=bookPage();
+    else if(currentPage==='my-bookings') el.innerHTML=myBookingsPage();
+    else if(currentPage==='messages') el.innerHTML=messagesPage(true);
+  }
+  bindEvents();
+}
+
+function providerDashboard(){
+  return `<div class="page active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="page-title" style="margin:0">Dashboard</div>
+      <div style="font-size:12px;color:var(--color-text-tertiary)">March 2025</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Today's bookings</div><div class="stat-val">4</div><div class="stat-sub stat-up">+2 from yesterday</div></div>
+      <div class="stat-card"><div class="stat-label">Monthly revenue</div><div class="stat-val">₹24k</div><div class="stat-sub stat-up">+18% this month</div></div>
+      <div class="stat-card"><div class="stat-label">Avg rating</div><div class="stat-val">4.9</div><div class="stat-sub">128 reviews</div></div>
+      <div class="stat-card"><div class="stat-label">Completion rate</div><div class="stat-val">97%</div><div class="stat-sub">All time</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Upcoming bookings</div>
+        ${bookings.filter(b=>b.status!=='cancelled').slice(0,3).map(b=>`
+        <div class="booking-item">
+          <div class="avatar ${b.avc}">${b.av}</div>
+          <div class="booking-info"><div class="booking-name">${b.name}</div><div class="booking-time">${b.time}</div></div>
+          <span class="status-badge s-${b.status}">${b.status}</span>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title">Weekly earnings</div>
+        ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>{
+          const vals=[60,80,45,100,90,70,30];
+          return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="font-size:11px;color:var(--color-text-tertiary);width:24px">${d}</div>
+            <div class="earnings-bar" style="flex:1"><div class="earnings-fill" style="width:${vals[i]}%"></div></div>
+            <div style="font-size:11px;color:var(--color-text-secondary);width:36px;text-align:right">₹${[1200,1600,900,2000,1800,1400,600][i]}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function calendarPage(){
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const bookedDays=[5,6,11,13,14,18,20,21,25];
+  return `<div class="page active">
+    <div class="page-title">Calendar</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">March 2025</div>
+        <div class="cal-grid">
+          ${days.map(d=>`<div class="cal-header">${d}</div>`).join('')}
+          ${Array.from({length:6}).map(()=>'<div class="cal-day empty"></div>').join('')}
+          ${Array.from({length:31},(_,i)=>{
+            const d=i+1;
+            const booked=bookedDays.includes(d);
+            const today=d===11;
+            const sel=d===selectedDate&&!today;
+            return `<div class="cal-day${today?' today':''}${sel?' selected':''}${booked?' has-booking':''}" onclick="selectDate(${d})">${d}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Time slots — Mar ${selectedDate}</div>
+        <div class="time-slots">
+          ${slots.map((s,i)=>`
+          <div class="time-slot${s.status==='booked'?' booked':''}${selectedSlot===i?' selected':''}" onclick="${s.status!=='booked'?`selectSlot(${i})`:''}">
+            <span class="slot-time">${s.time}</span>
+            <span class="slot-status${s.status==='booked'?'" style="color:var(--color-text-tertiary)"':'"'}">
+              ${s.status==='booked'?'Booked':'Available'}
+            </span>
+          </div>`).join('')}
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn btn-primary btn-sm" onclick="blockSlot()">Block selected</button>
+          <button class="btn btn-sm" onclick="openSlot()">Open all</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-title">Bookings on Mar ${selectedDate}</div>
+      ${bookings.slice(0,2).map(b=>`
+      <div class="booking-item">
+        <div class="avatar ${b.avc}">${b.av}</div>
+        <div class="booking-info"><div class="booking-name">${b.name} · ${b.service}</div><div class="booking-time">${b.time}</div></div>
+        <div class="actions">
+          <button class="btn btn-sm">Reschedule</button>
+          <button class="btn btn-sm" style="color:var(--color-text-danger,#A32D2D)">Cancel</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function bookingsPage(){
+  return `<div class="page active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="page-title" style="margin:0">Bookings</div>
+      <div style="display:flex;gap:6px">
+        ${['All','Today','Upcoming','Cancelled'].map((f,i)=>
+          `<button class="btn btn-sm${i===0?' btn-primary':''}" style="${i===0?'':'background:transparent'}">${f}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="card">
+      ${bookings.map(b=>`
+      <div class="booking-item">
+        <div class="avatar ${b.avc}">${b.av}</div>
+        <div class="booking-info">
+          <div class="booking-name">${b.name}</div>
+          <div class="booking-time">${b.service} · ${b.time}</div>
+        </div>
+        <span class="status-badge s-${b.status}">${b.status}</span>
+        <div class="actions">
+          ${b.status==='pending'?`<button class="btn btn-sm btn-primary" onclick="confirmBooking('${b.name}')">Confirm</button>`:''}
+          <button class="btn btn-sm">Message</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function messagesPage(isClient){
+  const contacts = isClient?
+    [{name:'Ravi Sharma',sub:'Haircut confirmed · Thu 2 PM',av:'RS',avc:'av-purple',active:true},
+     {name:'Nisha Patel',sub:'Skincare · Fri 4 PM',av:'NP',avc:'av-teal',active:false}]:
+    [{name:'Meera Singh',sub:'Booking confirmed',av:'MS',avc:'av-purple',active:true},
+     {name:'Arjun Kumar',sub:'Reschedule request',av:'AK',avc:'av-amber',active:false},
+     {name:'Priya Tiwari',sub:'Payment received',av:'PT',avc:'av-teal',active:false}];
+  return `<div class="page active">
+    <div class="page-title">Messages</div>
+    <div style="display:grid;grid-template-columns:160px 1fr;gap:12px">
+      <div class="card" style="padding:8px">
+        ${contacts.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--border-radius-md);cursor:pointer;background:${c.active?'#EEEDFE':'transparent'}">
+          <div class="avatar ${c.avc}" style="width:28px;height:28px;font-size:10px;flex-shrink:0">${c.av}</div>
+          <div><div style="font-size:12px;font-weight:500;color:${c.active?'#534AB7':'var(--color-text-primary)'}">${c.name}</div>
+          <div style="font-size:10px;color:var(--color-text-tertiary)">${c.sub}</div></div>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:10px">
+          <div class="avatar av-purple" style="width:30px;height:30px;font-size:10px">${isClient?'RS':'MS'}</div>
+          <div><div style="font-size:13px;font-weight:500">${isClient?'Ravi Sharma':'Meera Singh'}</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">${isClient?'Haircut · Thu 2:00 PM':'Booking confirmed · Thu 2:00 PM'}</div></div>
+          <div class="ws-indicator" style="margin-left:auto"><div class="ws-dot"></div>Online</div>
+        </div>
+        <div class="msg-list" id="msg-list">
+          ${renderMessages(isClient)}
+        </div>
+        <div class="msg-input-row">
+          <input class="msg-input" id="msg-input" placeholder="Type a message..." onkeydown="handleKey(event,${isClient})">
+          <button class="btn btn-primary" onclick="sendMsg(${isClient})">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderMessages(isClient){
+  return messages.map(m=>`
+  <div class="msg-row${(isClient&&m.from==='client')||(!isClient&&m.from==='provider')?' mine':''}">
+    <div class="msg-bubble">${m.text}<span class="msg-time">${m.time}</span></div>
+  </div>`).join('');
+}
+
+function servicesPage(){
+  const svcs=[
+    {icon:'✂',name:'Standard Haircut',price:'₹500 · 30 min',on:true},
+    {icon:'🪒',name:'Beard Trim & Shape',price:'₹300 · 20 min',on:true},
+    {icon:'💈',name:'Hair Color',price:'₹1500 · 90 min',on:true},
+    {icon:'🧴',name:'Hair Spa Treatment',price:'₹800 · 45 min',on:false},
+  ];
+  return `<div class="page active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="page-title" style="margin:0">My Services</div>
+      <button class="btn btn-primary btn-sm">+ Add service</button>
+    </div>
+    <div class="card">
+      ${svcs.map(s=>`<div class="service-item">
+        <div class="service-icon">${s.icon}</div>
+        <div class="service-details"><div class="service-name">${s.name}</div><div class="service-price">${s.price}</div></div>
+        <div class="toggle-wrap">
+          <div class="toggle${s.on?'':' off'}" onclick="this.classList.toggle('off')"></div>
+          <button class="btn btn-sm">Edit</button>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">Availability settings</div>
+      ${['Monday','Tuesday','Wednesday','Thursday','Friday'].map((d,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div style="font-size:13px;width:80px">${d}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);flex:1">9:00 AM – 6:00 PM</div>
+        <div class="toggle${i===2?' off':''}" onclick="this.classList.toggle('off')"></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function discoverPage(){
+  return `<div class="page active">
+    <div class="page-title">Find a Professional</div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+      ${['All','Haircare','Skincare','Wellness','Fitness','Therapy'].map((c,i)=>
+        `<button class="btn btn-sm${i===0?' btn-primary':''}">${c}</button>`
+      ).join('')}
+    </div>
+    <div class="client-providers">
+      ${providers.map((p,i)=>`
+      <div class="provider-card${selectedProvider===i?' sel':''}" onclick="selectProvider(${i})">
+        <div class="avatar ${p.avc}">${p.av}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${p.name}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary)">${p.service}</div>
+          <div class="stars">★★★★★ <span style="font-size:11px;color:var(--color-text-tertiary)">${p.rating} (${p.reviews})</span></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:500">${p.price}</div>
+          <div style="font-size:11px;color:var(--color-text-tertiary)">per session</div>
+          <button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="event.stopPropagation();bookProvider(${i})">Book</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function bookPage(){
+  const p=providers[selectedProvider];
+  return `<div class="page active">
+    <div class="page-title">Book a Session</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;padding:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg)">
+      <div class="avatar ${p.avc}">${p.av}</div>
+      <div><div style="font-size:13px;font-weight:500">${p.name}</div><div style="font-size:12px;color:var(--color-text-secondary)">${p.service} · ${p.price}</div></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:4px">
+      <div class="flow-step"><div class="flow-num done">1</div>Pick a date</div>
+      <div style="flex:1;border-top:1px dashed var(--color-border-tertiary);margin:10px 4px 0"></div>
+      <div class="flow-step"><div class="flow-num active">2</div>Choose time</div>
+      <div style="flex:1;border-top:1px dashed var(--color-border-tertiary);margin:10px 4px 0"></div>
+      <div class="flow-step"><div class="flow-num">3</div>Confirm</div>
+    </div>
+    <div class="two-col" style="margin-top:12px">
+      <div class="card">
+        <div class="card-title">Select date</div>
+        <div class="cal-grid">
+          ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cal-header">${d}</div>`).join('')}
+          ${Array.from({length:6}).map(()=>'<div class="cal-day empty"></div>').join('')}
+          ${Array.from({length:31},(_,i)=>{
+            const d=i+1;const today=d===11;const sel=d===selectedDate&&!today;
+            return `<div class="cal-day${today?' today':''}${sel?' selected':''}" onclick="selectDate(${d})">${d}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Available times — Mar ${selectedDate}</div>
+        <div class="time-slots">
+          ${slots.filter(s=>s.status==='available').map((s,i)=>`
+          <div class="time-slot${selectedSlot===i?' selected':''}" onclick="selectSlot(${i})">
+            <span class="slot-time">${s.time}</span>
+            <span class="slot-status">Open</span>
+          </div>`).join('')}
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:10px;padding:8px" onclick="confirmBook()">Confirm Booking →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function myBookingsPage(){
+  return `<div class="page active">
+    <div class="page-title">My Bookings</div>
+    <div class="card">
+      ${[
+        {name:'Ravi Sharma',service:'Haircut & Styling',time:'Thu Mar 13 · 2:00 PM',status:'confirmed',av:'RS',avc:'av-purple'},
+        {name:'Nisha Patel',service:'Skincare Facial',time:'Fri Mar 14 · 4:00 PM',status:'upcoming',av:'NP',avc:'av-teal'},
+      ].map(b=>`
+      <div class="booking-item">
+        <div class="avatar ${b.avc}">${b.av}</div>
+        <div class="booking-info"><div class="booking-name">${b.name}</div><div class="booking-time">${b.service} · ${b.time}</div></div>
+        <span class="status-badge s-${b.status}">${b.status}</span>
+        <div class="actions">
+          <button class="btn btn-sm">Message</button>
+          <button class="btn btn-sm">Reschedule</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function bindEvents(){}
+
+function selectDate(d){selectedDate=d;selectedSlot=null;renderPage();}
+function selectSlot(i){selectedSlot=i===selectedSlot?null:i;renderPage();}
+function selectProvider(i){selectedProvider=i;}
+function bookProvider(i){selectedProvider=i;goTo('book');}
+
+function blockSlot(){
+  if(selectedSlot!==null){
+    slots[selectedSlot].status='booked';
+    selectedSlot=null;renderPage();
+    pushNotif('Slot blocked successfully');
+  }
+}
+function openSlot(){slots.forEach(s=>s.status='available');selectedSlot=null;renderPage();}
+
+function confirmBook(){
+  pushNotif('Booking confirmed! Ravi Sharma · Mar '+selectedDate);
+  goTo('my-bookings');
+}
+
+function confirmBooking(name){
+  pushNotif('Booking confirmed for '+name);
+}
+
+function handleKey(e,isClient){if(e.key==='Enter')sendMsg(isClient);}
+function sendMsg(isClient){
+  const inp=document.getElementById('msg-input');
+  const txt=inp.value.trim();if(!txt)return;
+  const now=new Date();
+  const time=now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes()+' '+(now.getHours()<12?'AM':'PM');
+  messages.push({from:isClient?'client':'provider',text:txt,time});
+  inp.value='';
+  const list=document.getElementById('msg-list');
+  if(list){
+    list.innerHTML=renderMessages(isClient);
+    list.scrollTop=list.scrollHeight;
+  }
+  setTimeout(()=>{
+    const replies=isClient?
+      ['Got it! See you then.','Of course! Anything else?','Noted, booking updated.']:
+      ['Thanks for confirming!','Sounds good, see you soon!','Appreciate it!'];
+    messages.push({from:isClient?'provider':'client',text:replies[Math.floor(Math.random()*replies.length)],time});
+    const l=document.getElementById('msg-list');
+    if(l){l.innerHTML=renderMessages(isClient);l.scrollTop=l.scrollHeight;}
+    pushNotif('New message received');
+  },1500);
+}
+
+function pushNotif(text){
+  notifications.unshift({text,time:'just now',unread:true});
+  document.getElementById('notif-dot').style.display='block';
+  renderNotifs();
+  setTimeout(()=>{
+    document.getElementById('notif-dot').style.display='none';
+    notifications[0].unread=false;
+    renderNotifs();
+  },4000);
+}
+
+function renderNotifs(){
+  const list=document.getElementById('notif-list');
+  list.innerHTML=notifications.slice(0,4).map(n=>`
+  <div class="notif-item${n.unread?' unread':''}">
+    ${n.unread?'<div class="notif-dot2"></div>':'<div style="width:8px"></div>'}
+    <div><div class="notif-text">${n.text}</div><div class="notif-ts">${n.time}</div></div>
+  </div>`).join('');
+}
+
+function toggleNotif(){
+  notifOpen=!notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open',notifOpen);
+  if(notifOpen)renderNotifs();
+}
+
+document.addEventListener('click',e=>{
+  if(notifOpen&&!e.target.closest('#notif-panel')&&!e.target.closest('#bell')){
+    notifOpen=false;
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+setRole('provider');
+</script>
